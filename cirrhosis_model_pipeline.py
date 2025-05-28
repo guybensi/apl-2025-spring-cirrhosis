@@ -3,7 +3,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split, StratifiedKFold
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.preprocessing import OneHotEncoder, StandardScaler, LabelEncoder
 from sklearn.impute import SimpleImputer
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.metrics import log_loss
@@ -22,6 +22,10 @@ test = pd.read_csv("test.csv")
 high_missing = ["Tryglicerides", "Cholesterol", "Copper", "SGOT", "Alk_Phos", "Spiders", "Hepatomegaly", "Drug", "Ascites"]
 train = train.drop(columns=high_missing)
 test = test.drop(columns=[col for col in high_missing if col in test.columns])
+
+# === Encode labels ===
+le = LabelEncoder()
+train["Status"] = le.fit_transform(train["Status"])
 
 # === Target ===
 y = train["Status"]
@@ -60,7 +64,7 @@ def evaluate_model(clf, name):
         y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
         pipe.fit(X_train, y_train)
         y_pred_proba = pipe.predict_proba(X_val)
-        scores.append(log_loss(y_val, y_pred_proba, labels=["C", "CL", "D"]))
+        scores.append(log_loss(y_val, y_pred_proba, labels=[0, 1, 2]))
     print(f"{name} Avg Log Loss: {np.mean(scores):.5f}")
     return np.mean(scores)
 
