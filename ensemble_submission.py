@@ -82,8 +82,8 @@ w_lgb = 0.42
 w_gbr = 1.0 - w_xgb - w_lgb
 
 final_preds = w_xgb * xgb_test + w_lgb * lgb_test + w_gbr * gbr_test
-final_labels = le.inverse_transform(np.argmax(final_preds, axis=1))
-
-submission = pd.DataFrame({"id": test_ids, "Status": final_labels})
+submission = pd.DataFrame(final_preds, columns=["Status_C", "Status_CL", "Status_D"])
+submission.insert(0, "id", test["id"].values)
 submission.to_csv("submission.csv", index=False)
+
 print("✅ submission.csv generated using fixed weights:", f"XGB={w_xgb}", f"LGB={w_lgb}", f"GBR={w_gbr:.4f}")
